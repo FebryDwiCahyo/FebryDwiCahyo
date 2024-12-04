@@ -1,6 +1,6 @@
 # Reparin
 
-Tugas Kelompok Membuat Aplikasi Mobile Menggunakan Flutter
+Tugas Kelompok Membuat Aplikasi Mobile Menggunakan Flutter.
 
 ## Getting Started
 
