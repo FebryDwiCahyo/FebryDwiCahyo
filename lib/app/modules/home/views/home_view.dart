@@ -12,37 +12,56 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController searchController = TextEditingController();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF0093B7),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Location',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.white),
-                SizedBox(width: 4),
-                Text(
-                  'Jakarta, Indonesia',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+          title: GestureDetector(
+          onTap: () async {
+            await controller.getCurrentLocation(); // Panggil metode untuk mendapatkan lokasi
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Location',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.normal,
                 ),
-              ],
-            ),
-          ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, size: 16, color: Colors.white),
+                  const SizedBox(width: 4),
+                  Obx(() {
+                    if (controller.loading.value) {
+                      return const Text(
+                        'Loading...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        controller.addressDetails.value,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }
+                  }),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(
@@ -64,9 +83,8 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: Column(
+     body: Column(
         children: [
-          // Sticky "Find nearby services" section
           Container(
             padding: const EdgeInsets.only(
               left: 16,
@@ -82,6 +100,18 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             child: TextField(
+              controller: searchController,
+              onChanged: (value) {
+                controller.filterServicesByLocation(value);
+              },
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  Get.toNamed('/search-results', arguments: {
+                    'query': value,
+                    'services': controller.filteredServices
+                  });
+                }
+              },
               decoration: InputDecoration(
                 hintText: 'Find nearby services . . .',
                 hintStyle: TextStyle(
@@ -228,6 +258,28 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Obx(() {
+                      return GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 1.1,
+                        ),
+                        itemCount: controller.filteredServices.length,
+                        itemBuilder: (context, index) {
+                          var service = controller.filteredServices[index];
+                          return _buildServiceCard(service);
+                        },
+                      );
+                    }),
+                  ),
+
                   const SizedBox(height: 24), // Spacing di bawah tombol
                 ],
               ),
@@ -271,8 +323,7 @@ class HomeView extends GetView<HomeController> {
   Widget _buildServiceCard(Map<String, dynamic> service) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(
-            '/popular-service'); // Navigate to Popular Service page on image tap
+        Get.toNamed('/popular-service'); // Navigate to Popular Service page on image tap
       },
       child: Container(
         decoration: BoxDecoration(
@@ -309,6 +360,7 @@ class HomeView extends GetView<HomeController> {
                 color: Colors.green,
               ),
             ),
+            const SizedBox(height: 4),
             Text(
               service['provider'],
               style: const TextStyle(
@@ -316,9 +368,18 @@ class HomeView extends GetView<HomeController> {
                 color: Colors.grey,
               ),
             ),
+            const SizedBox(height: 4),
+            Text(
+              service['address'],
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.blueGrey,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
 }

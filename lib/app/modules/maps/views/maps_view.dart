@@ -4,7 +4,7 @@ import 'package:reparin_mobile/app/modules/maps/controllers/maps_controller.dart
 
 
 class MapsView extends StatelessWidget {
-  const MapsView({Key? key}) : super(key: key);
+  const MapsView({super.key});
 
   @override
   Widget build(BuildContext context) {

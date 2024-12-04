@@ -41,7 +41,7 @@ class SettingsView extends GetView<SettingsController> {
                       }
                     },
                   )
-                ).toList(),
+                ),
                 
                 // Custom URL option
                 RadioListTile(

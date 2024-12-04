@@ -84,7 +84,7 @@ import '../modules/getconnect/bindings/getconnect_binding.dart';
 import '../modules/getconnect/views/getconnect_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
-
+import '../modules/searchresults/views/searchresults_view.dart';
 
 part 'app_routes.dart';
 
@@ -348,5 +348,16 @@ class AppPages {
       page: () => SelectedLocationView(),
       binding: SelectedLocationBinding(),
     ),
+
+  GetPage(
+  name: '/search-results',
+  page: () {
+    final arguments = Get.arguments;
+    return SearchResultsView(
+      query: arguments['query'],
+      services: arguments['services'],
+    );
+  },
+),
   ];
 }

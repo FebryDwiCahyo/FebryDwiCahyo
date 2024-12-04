@@ -5,7 +5,7 @@ import '../../../data/services/getconnect_controller.dart';
 class AddressSearchView extends StatelessWidget {
   final Function(String) onAddressSelected;
 
-  AddressSearchView({required this.onAddressSelected});
+  AddressSearchView({super.key, required this.onAddressSelected});
    final GetConnectController controller = Get.put(GetConnectController());
 
   @override
