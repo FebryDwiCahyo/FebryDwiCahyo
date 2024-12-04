@@ -183,7 +183,7 @@ class ServicePageConfirmationView extends GetView<ServicePageConfirmationControl
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Today'),
+          const Text('Today'),
           Text('${date.day} Oct'),
         ],
       ),

@@ -81,10 +81,12 @@ class OnboardingView extends GetView<OnboardingController> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Back Button
-                  Visibility(
-                    visible: controller.currentPage.value != 0, // Hide back button on first page
+                  Opacity(
+                    opacity: controller.currentPage.value != 0 ? 1.0 : 0.0,  // Set opacity to 0 on the first page, otherwise 1
                     child: IconButton(
-                      onPressed: () => controller.previousPage(),
+                      onPressed: controller.currentPage.value != 0 
+                          ? () => controller.previousPage()  // Only allow navigation if not on the first page
+                          : null,  // Disable button functionality when on the first page
                       icon: const Icon(Icons.arrow_back_ios),
                     ),
                   ),

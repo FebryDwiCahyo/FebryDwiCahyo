@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/contact_us_controllers.dart';
 
 class ContactUsView extends GetView<ContactUsController> {
-  const ContactUsView({Key? key}) : super(key: key);
+  const ContactUsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class ContactUsView extends GetView<ContactUsController> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text('FAQ'),
@@ -59,7 +59,7 @@ class ContactUsView extends GetView<ContactUsController> {
         leading: Icon(icon, color: Colors.blue),
         title: Text(title),
         subtitle: subtitle != null ? Text(subtitle) : null,
-        trailing: Icon(Icons.chevron_right),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () => controller.onContactItemTap(title),
       ),
     );

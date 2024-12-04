@@ -34,7 +34,7 @@ class NotificationView extends GetView<NotificationController> {
                 time: notif['time'],
                 isNew: notif['isNew'],
               );
-            }).toList(),
+            }),
             const SizedBox(height: 20),
             const Text('YESTERDAY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ...controller.notifications.where((n) => n['time'] == '1d').map((notification) {
@@ -45,7 +45,7 @@ class NotificationView extends GetView<NotificationController> {
                 time: notif['time'],
                 isNew: notif['isNew'],
               );
-            }).toList(),
+            }),
           ],
         );
       }),
@@ -60,12 +60,12 @@ class NotificationTile extends StatelessWidget {
   final bool isNew;
 
   const NotificationTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     required this.time,
     required this.isNew,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -73,14 +73,14 @@ class NotificationTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
       leading: CircleAvatar(
         backgroundColor: Colors.grey[300],
-        child: Icon(Icons.notifications, color: Colors.blue),
+        child: const Icon(Icons.notifications, color: Colors.blue),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(description),
       trailing: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(time, style: TextStyle(color: Colors.grey)),
+          Text(time, style: const TextStyle(color: Colors.grey)),
           if (isNew)
             Container(
               padding: const EdgeInsets.all(4.0),

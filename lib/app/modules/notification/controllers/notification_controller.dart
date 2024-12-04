@@ -43,9 +43,9 @@ class NotificationController extends GetxController {
 
   // Mark all as read
   void markAllAsRead() {
-    notifications.forEach((notification) {
+    for (var notification in notifications) {
       notification['isNew'] = false;
-    });
+    }
     notifications.refresh();
   }
 }

@@ -1,5 +1,9 @@
+// Update pada file: /lib/app/modules/home/views/home_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../webview/controllers/webview_controller.dart';
+import '../../webview/views/webview_reparin.dart';
 import '../controllers/home_controller.dart';
 import 'package:reparin_mobile/app/modules/navbar/views/navbar_view.dart'; // Assuming the custom navigation bar exists
 
@@ -13,10 +17,10 @@ class HomeView extends GetView<HomeController> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF0093B7),
-        title: Column(
+        title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Location',
               style: TextStyle(
                 fontSize: 14,
@@ -25,11 +29,11 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             Row(
-              children: const [
+              children: [
                 Icon(Icons.location_on, size: 16, color: Colors.white),
                 SizedBox(width: 4),
                 Text(
-                  'Surabaya, Indonesia',
+                  'Jakarta, Indonesia',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.white,
@@ -41,6 +45,17 @@ class HomeView extends GetView<HomeController> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.newspaper_outlined),
+            onPressed: () {
+              Get.to(
+                () => const HelpWebViewReparin(),
+                binding: BindingsBuilder(() {
+                  Get.put(ArticleDetailController()); // Bind the controller here
+                }),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
@@ -186,6 +201,34 @@ class HomeView extends GetView<HomeController> {
                       );
                     }),
                   ),
+                  
+                  // Tambahkan tombol "View News" di bagian paling bawah
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.toNamed('/news'); // Navigate to news page
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0093B7), // Warna tombol
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'View News',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24), // Spacing di bawah tombol
                 ],
               ),
             ),
@@ -222,23 +265,6 @@ class HomeView extends GetView<HomeController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPromoCard(String imagePath) {
-    return Container(
-      width: 160,
-      height: 100,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.contain,
-        ),
-      ),
     );
   }
 

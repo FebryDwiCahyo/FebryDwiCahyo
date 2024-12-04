@@ -18,7 +18,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
           currentIndex: controller.selectedIndex.value, // Observe the selected index
-          selectedItemColor: Color(0xFF0093B7),
+          selectedItemColor: const Color(0xFF0093B7),
           unselectedItemColor: Colors.black,
           onTap: (index) => controller.onItemTapped(index), // Handle tap
         ));

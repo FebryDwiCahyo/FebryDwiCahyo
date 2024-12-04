@@ -1,50 +1,209 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../profileView/controllers/profileView_controller.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import '../../../data/models/profile_model.dart';
+import 'dart:io';
 
 class ProfileController extends GetxController {
-  late final ProfileViewController _profileViewController;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  final profile = Rx<Profile>(Profile.empty());
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+
+  // Stream subscription for real-time updates
+  StreamSubscription<DocumentSnapshot>? _profileSubscription;
 
   @override
   void onInit() {
     super.onInit();
+    // Instead of just loading once, we'll listen to real-time updates
+    setupProfileListener();
+  }
 
-    // Inisialisasi ProfileViewController di sini
-    if (!Get.isRegistered<ProfileViewController>()) {
-      Get.put(ProfileViewController());
+  void setupProfileListener() {
+    final User? currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      _profileSubscription = _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .snapshots()
+          .listen(
+        (DocumentSnapshot snapshot) {
+          if (snapshot.exists) {
+            // Tambahkan debug prints yang lebih detail
+            final data = snapshot.data() as Map<String, dynamic>;
+            print('Raw Firestore data:');
+            print('imagePath from Firestore: ${data['imagePath']}');
+
+            try {
+              profile.value = Profile.fromFirestore(snapshot);
+              print('Profile after conversion:');
+              print(
+                  'Image Path in profile object: ${profile.value.imagePath.value}');
+
+              // Verify if the path is actually changing
+              if (profile.value.imagePath.value.isEmpty) {
+                print('Warning: Image path is empty after conversion');
+              }
+            } catch (e) {
+              print('Error converting Firestore data to Profile: $e');
+            }
+          } else {
+            print('Document does not exist');
+          }
+        },
+        onError: (error) {
+          print('Error in profile stream: $error');
+        },
+      );
     }
-
-    _profileViewController = Get.find<ProfileViewController>();
-
-    // Memastikan profileViewController sudah diinisialisasi
-    ever(_profileViewController.profile, (_) => update());
   }
 
-  Rx<String> get imagePath => _profileViewController.profile.value.imagePath;
-  Rx<String> get name => _profileViewController.profile.value.name;
-  Rx<String> get phone => _profileViewController.profile.value.phone;
-  Rx<String> get email => _profileViewController.profile.value.email;
+  Future<void> loadUserProfile() async {
+    try {
+      final User? currentUser = _auth.currentUser;
 
-  final ImagePicker _picker = ImagePicker();
+      if (currentUser != null) {
+        // Get email from Firebase Auth
+        emailController.text = currentUser.email ?? '';
+        profile.value.email.value = currentUser.email ?? '';
 
-  Future<void> pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      _profileViewController.profile.update((val) {
-        val!.imagePath.value = image.path;
-      });
+        // Get additional data from Firestore
+        final DocumentSnapshot doc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
+
+        if (doc.exists) {
+          profile.value = Profile.fromFirestore(doc);
+
+          // Update text controllers with Firestore data
+          nameController.text = profile.value.name.value;
+          phoneController.text = profile.value.phone.value;
+        } else {
+          print('User document does not exist.');
+          Get.snackbar(
+            'Error',
+            'User document does not exist.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+        }
+      } else {
+        print('No current user found.');
+        Get.snackbar(
+          'Error',
+          'No current user found.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red,
+        );
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to load profile data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
     }
   }
 
-  Future<void> signOut() async {
-    Get.offAllNamed('/login');
+  Future<void> updateProfileImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        final File imageFile = File(image.path);
+
+        // Upload to Firebase Storage
+        final String userId = _auth.currentUser?.uid ?? '';
+        final Reference ref =
+            _storage.ref().child('profile_images/$userId.jpg');
+
+        // Show loading indicator
+        Get.dialog(
+          const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false,
+        );
+
+        // Upload file
+        await ref.putFile(imageFile);
+
+        // Get download URL
+        final String downloadURL = await ref.getDownloadURL();
+
+        // Update Firestore - this will trigger the stream listener
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .update({'imagePath': downloadURL});
+
+        // Close loading dialog
+        Get.back();
+
+        Get.snackbar(
+          'Success',
+          'Profile picture updated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.1),
+          colorText: Colors.green,
+        );
+      }
+    } catch (e) {
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Failed to update profile picture: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
   }
 
-  void updateProfile({String? name, String? phone, String? email}) {
-    _profileViewController.profile.update((val) {
-      if (name != null) val!.name.value = name;
-      if (phone != null) val!.phone.value = phone;
-      if (email != null) val!.email.value = email;
-    });
+  Future<bool> updateProfile() async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) return false;
+
+      final userData = {
+        'name': profile.value.name.value,
+        'phone': profile.value.phone.value,
+        'imagePath': profile.value.imagePath.value,
+      };
+
+      await _firestore.collection('users').doc(userId).update(userData);
+      return true;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to update profile: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return false;
+    }
+  }
+
+  @override
+  void onClose() {
+    _profileSubscription?.cancel(); // Cancel the stream subscription
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    super.onClose();
   }
 }

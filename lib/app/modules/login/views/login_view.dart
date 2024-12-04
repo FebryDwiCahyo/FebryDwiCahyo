@@ -99,12 +99,12 @@ class LoginView extends GetView<LoginController> {
 
             // Sign In Button
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 String email = emailController.text;
                 String password = passwordController.text;
 
                 // Validate credentials
-                if (controller.validateLogin(email, password)) {
+                if (await controller.validateLogin(email, password)) {
                   Get.toNamed('/home'); // Navigate to HomeView
                 } else {
                   Get.snackbar('Error', 'Invalid email or password');
@@ -164,7 +164,7 @@ class LoginView extends GetView<LoginController> {
                 const Text("Don't have an account?"),
                 TextButton(
                   onPressed: () {
-                    Get.toNamed('/signup'); // Navigate to SignupView
+                    Get.toNamed('/register'); // Navigate to SignupView
                   },
                   child: const Text('Sign Up'),
                 ),

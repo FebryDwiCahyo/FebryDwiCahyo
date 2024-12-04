@@ -34,8 +34,8 @@ class HomeMerdekaView extends GetView<HomeMerdekaController> {
                       ),
                     ),
                   ),
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Padding(
                         padding: EdgeInsets.only(left: 16),
                         child: Icon(Icons.location_on, size: 16, color: Colors.white),

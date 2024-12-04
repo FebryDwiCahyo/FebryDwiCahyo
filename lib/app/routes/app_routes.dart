@@ -6,6 +6,7 @@ abstract class Routes {
   static const HOME = _Paths.HOME;
   static const PROMO = _Paths.PROMO;
   static const LOGIN = _Paths.LOGIN;
+  static const REGISTER = _Paths.REGISTER;
   static const PROFILE = _Paths.PROFILE;
   static const profileView = _Paths.ProfileView;
   static const EXPLORE = _Paths.EXPLORE;
@@ -16,12 +17,14 @@ abstract class Routes {
   static const POPULAR = _Paths.POPULAR;
   static const MESSAGE = _Paths.MESSAGE;
   static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const SERVICEBOOKING = _Paths.SERVICEBOOKING;
   static const bookService = _Paths.BookService;
   static const BOOKUPCOMING = _Paths.BOOKUPCOMING;
   static const BOOKCOMPLETED = _Paths.BOOKCOMPLETED;
   static const BOOKCANCELLED = _Paths.BOOKCANCELLED;
+  static const BOOKSUCCESS = _Paths.BOOKSUCCESS;
   static const PAYMENTMETHOD = _Paths.PAYMENTMETHOD;
-  static const addCard = _Paths.addCard;  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card.  // Additional path for adding a payment card
+  static const addCard = _Paths.addCard;
   static const REVIEWSUMMARY = _Paths.REVIEWSUMMARY;
   static const SUCCESSBOOKING = _Paths.SUCCESSBOOKING;
   static const ERECEIPT = _Paths.ERECEIPT;
@@ -36,6 +39,10 @@ abstract class Routes {
   static const ABOUT = _Paths.ABOUT;
   static const HELP_CENTER_FAQ = _Paths.HELP_CENTER_FAQ;
   static const CONTACT_US = _Paths.CONTACT_US;
+  static const HELPWEBVIEW = _Paths.HELPWEBVIEW;
+  static const SETTINGS = _Paths.SETTINGS;
+  static const MAPS = _Paths.MAPS;
+  static const SELECTED_LOCATION = _Paths.SELECTED_LOCATION; 
 }
 
 abstract class _Paths {
@@ -44,6 +51,7 @@ abstract class _Paths {
   static const HOMEMERDEKA = '/homeMerdeka';
   static const PROMO = '/promo';
   static const LOGIN = '/login';
+  static const REGISTER = '/register';
   static const PROFILE = '/profile';
   static const ProfileView = '/profile/edit';
   static const EXPLORE = '/explore';
@@ -54,10 +62,12 @@ abstract class _Paths {
   static const POPULAR = '/popular-service';
   static const MESSAGE = '/message';
   static const NOTIFICATION = '/notification';
+  static const SERVICEBOOKING = '/service-booking';
   static const BookService = '/book/service';
   static const BOOKUPCOMING = '/bookupcoming';
   static const BOOKCOMPLETED = '/bookcompleted';
   static const BOOKCANCELLED = '/bookcancelled';
+  static const BOOKSUCCESS = '/booksuccess';
   static const PAYMENTMETHOD = '/paymentmethod';
   static const addCard = '/payment/method/card';
   static const REVIEWSUMMARY = '/reviewsummary';
@@ -74,4 +84,8 @@ abstract class _Paths {
   static const ABOUT = '/about';
   static const HELP_CENTER_FAQ = '/help_center_faq';
   static const CONTACT_US = '/contact_us';
+  static const HELPWEBVIEW = '/helpwebview';
+  static const SETTINGS = '/settings';
+  static const MAPS = '/maps';
+  static const SELECTED_LOCATION = '/selected-location';
 }

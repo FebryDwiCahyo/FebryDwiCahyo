@@ -19,10 +19,11 @@ class LocationInputView extends GetView<LocationInputController> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Search input field
             TextField(
               controller: controller.searchController,
               decoration: InputDecoration(
-                hintText: 'Galaxy Mall Surabaya',
+                hintText: 'Search for a location...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
@@ -35,8 +36,12 @@ class LocationInputView extends GetView<LocationInputController> {
               onChanged: controller.onSearchChanged,
             ),
             const SizedBox(height: 16),
+            // Use current location button
             InkWell(
-              onTap: controller.useCurrentLocation,
+              onTap: () {
+                controller.useCurrentLocation();
+                controller.searchController.text = 'Current Location';
+              },
               child: const Row(
                 children: [
                   Icon(Icons.my_location, color: Colors.blue),
@@ -46,28 +51,26 @@ class LocationInputView extends GetView<LocationInputController> {
               ),
             ),
             const SizedBox(height: 16),
-            Obx(() => controller.searchResults.isNotEmpty
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('SEARCH RESULT', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    const SizedBox(height: 8),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: controller.searchResults.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: const Icon(Icons.location_on),
-                          title: Text(controller.searchResults[index].name),
-                          subtitle: Text(controller.searchResults[index].address),
-                          onTap: () => controller.selectLocation(controller.searchResults[index]),
-                        );
-                      },
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink()
-            ),
+            // Search results
+            Obx(() {
+              if (controller.searchResults.isNotEmpty) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: controller.searchResults.length,
+                    itemBuilder: (context, index) {
+                      final location = controller.searchResults[index];
+                      return ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: Text(location.name),
+                        subtitle: Text(location.address),
+                        onTap: () => controller.selectLocation(controller.searchResults[index]),
+                      );
+                    },
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
           ],
         ),
       ),

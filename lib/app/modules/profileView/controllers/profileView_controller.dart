@@ -1,187 +1,120 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import '../../../data/models/profile_model.dart';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../data/models/profile_model.dart';
+
 class ProfileViewController extends GetxController {
-  // State management
-  final Rx<Profile> profile = Profile.empty().obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isImageLoading = false.obs;
-  final RxBool isEditing = false.obs;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+  final profile = Rx<Profile>(Profile.empty());
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
 
-  // Form controllers
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
-  late TextEditingController emailController;
-
-  // Image picker
-  final ImagePicker _picker = ImagePicker();
-
-  // Getters for form validation
-  bool get isFormValid => 
-    nameController.text.trim().isNotEmpty &&
-    phoneController.text.trim().isNotEmpty &&
-    emailController.text.trim().isNotEmpty;
-
+Future<void> updateProfileImage() async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  
+  if (image != null) {
+    profile.update((val) {
+      if (val != null) val.imagePath.value = image.path;
+    });
+    // TODO: Implement Firebase Storage upload if needed
+  }
+}
+  
   @override
   void onInit() {
     super.onInit();
-    _initializeControllers();
-    _loadProfile();
+    loadUserProfile();
   }
-
-  void _initializeControllers() {
-    nameController = TextEditingController(text: profile.value.name.value);
-    phoneController = TextEditingController(text: profile.value.phone.value);
-    emailController = TextEditingController(text: profile.value.email.value);
-
-    // Listen to changes in text controllers and update profile
-    nameController.addListener(_updateProfileFromControllers);
-    phoneController.addListener(_updateProfileFromControllers);
-    emailController.addListener(_updateProfileFromControllers);
-  }
-
-  void _updateProfileFromControllers() {
-    profile.update((val) {
-      if (val != null) {
-        val.name.value = nameController.text.trim();
-        val.phone.value = phoneController.text.trim();
-        val.email.value = emailController.text.trim();
-      }
-    });
-  }
-
-  Future<void> _loadProfile() async {
+  
+  Future<void> loadUserProfile() async {
     try {
-      isLoading.value = true;
-      // Simulate loading from API or local storage
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // For testing purposes, you can uncomment this to load dummy data
-      // profile.value = Profile(
-      //   name: 'John Doe',
-      //   phone: '1234567890',
-      //   email: 'john@example.com',
-      // );
-
-      _updateControllersFromProfile();
-    } catch (e) {
-      _handleError('Error loading profile', e);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void _updateControllersFromProfile() {
-    nameController.text = profile.value.name.value;
-    phoneController.text = profile.value.phone.value;
-    emailController.text = profile.value.email.value;
-  }
-
-  Future<void> pickImage({ImageSource source = ImageSource.gallery}) async {
-    try {
-      isImageLoading.value = true;
-      
-      final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-        imageQuality: 75,
-        maxWidth: 800,
-        maxHeight: 800,
-      );
-
-      if (pickedFile != null) {
-        // Verify if file exists and is accessible
-        final File file = File(pickedFile.path);
-        if (await file.exists()) {
-          profile.update((val) {
-            if (val != null) {
-              val.imagePath.value = pickedFile.path;
-            }
-          });
-        } else {
-          throw Exception('Selected image file is not accessible');
+      final User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        final DocumentSnapshot doc = await _firestore
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+            
+        if (doc.exists) {
+          profile.value = Profile.fromFirestore(doc);
         }
       }
     } catch (e) {
-      _handleError('Failed to pick image', e);
-    } finally {
-      isImageLoading.value = false;
+      print('Error loading profile: $e');
     }
   }
+  Future<bool> updateProfile() async {
+  try {
+    final userData = profile.value.toJson();
+    await _firestore
+        .collection('users')
+        .doc(_auth.currentUser?.uid)
+        .update(userData);
+    return true;
+  } catch (e) {
+    Get.snackbar(
+      'Error',
+      'Failed to update profile: $e',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.withOpacity(0.1),
+      colorText: Colors.red,
+    );
+    return false;
+  }
+}
 
-  Future<void> updateProfile() async {
-    if (!isFormValid) {
-      Get.snackbar(
-        'Error',
-        'Please fill in all required fields',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
+  Future<void> deleteProfileImage() async {
     try {
-      isLoading.value = true;
+      // If there's an existing image file, delete it
+      if (profile.value.imagePath.value.isNotEmpty) {
+        final File imageFile = File(profile.value.imagePath.value);
+        if (await imageFile.exists()) {
+          await imageFile.delete();
+        }
+      }
 
-      // Create updated profile
-      final updatedProfile = profile.value.copyWith(
-        name: nameController.text.trim(),
-        phone: phoneController.text.trim(),
-        email: emailController.text.trim(),
-      );
+      // Reset the image path in the profile
+      profile.update((val) {
+        if (val != null) val.imagePath.value = '';
+      });
 
-      // Here you would typically send the updated profile to a server
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Update local profile after successful API call
-      profile.value = updatedProfile;
+      // Update Firestore to remove the image path
+      await _firestore
+          .collection('users')
+          .doc(_auth.currentUser?.uid)
+          .update({'imagePath': ''});
 
       Get.snackbar(
         'Success',
-        'Profile updated successfully',
+        'Profile picture removed successfully',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+        backgroundColor: Colors.green.withOpacity(0.1),
+        colorText: Colors.green,
       );
-
-      isEditing.value = false;
     } catch (e) {
-      _handleError('Failed to update profile', e);
-    } finally {
-      isLoading.value = false;
+      Get.snackbar(
+        'Error',
+        'Failed to remove profile picture: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
     }
   }
 
-  void startEditing() {
-    isEditing.value = true;
-  }
-
-  void cancelEditing() {
-    isEditing.value = false;
-    _updateControllersFromProfile(); // Reset form to current profile values
-  }
-
-  void _handleError(String message, dynamic error) {
-    print('$message: $error'); // For debugging
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-  }
-
-  @override
-  void onClose() {
-    // Dispose of controllers
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.onClose();
-  }
+@override
+void onClose() {
+  nameController.dispose();
+  phoneController.dispose();
+  emailController.dispose();
+  super.onClose();
+}
 }

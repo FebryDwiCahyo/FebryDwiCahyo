@@ -51,7 +51,7 @@ class ExploreView extends GetView<ExploreController> {
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () => controller.allowLocationAccess(),
+              onPressed: () {Get.toNamed('/locationinput');},
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),

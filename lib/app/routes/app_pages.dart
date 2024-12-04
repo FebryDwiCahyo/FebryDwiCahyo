@@ -1,4 +1,11 @@
 import 'package:get/get.dart';
+import 'package:reparin_mobile/app/modules/maps/bindings/maps_binding.dart';
+import 'package:reparin_mobile/app/modules/maps/views/maps_view.dart';
+import 'package:reparin_mobile/app/modules/selected_location/bindings/selected_location_binding.dart';
+import 'package:reparin_mobile/app/modules/selected_location/views/selected_location_view.dart';
+import '../data/services/authentication/bindings/authentication_binding.dart';
+import '../modules/booking_service/controllers/booking_service_controller.dart';
+import '../modules/booking_service/views/booking_service_view.dart';
 import '../modules/category/bindings/category_binding.dart';
 import '../modules/category/views/category_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -21,10 +28,14 @@ import '../modules/bookcompleted/bindings/bookcompleted_binding.dart';
 import '../modules/bookcompleted/views/bookcompleted_views.dart';
 import '../modules/bookcancelled/bindings/bookcancelled_binding.dart';
 import '../modules/bookcancelled/views/bookcancelled_views.dart';
+import '../modules/bookingsuccess/bindings/booksuccess_binding.dart';
+import '../modules/bookingsuccess/views/booksuccess_views.dart';
 import '../modules/add_card/bindings/add_card_binding.dart';
 import '../modules/add_card/views/add_card_view.dart';
 import '../modules/paymentsmethod/bindings/paymentmethod_bindings.dart';
 import '../modules/paymentsmethod/views/paymentmethod_views.dart';
+import '../modules/register/bindings/register_binding.dart';
+import '../modules/register/views/register_view.dart';
 import '../modules/reviewsummary/bindings/reviewsummary_binding.dart';
 import '../modules/reviewsummary/views/reviewsummary_views.dart';
 import '../modules/successbooking/bindings/successbooking_binding.dart';
@@ -53,8 +64,8 @@ import '../modules/started/bindings/started_binding.dart';
 import '../modules/started/views/started_view.dart';
 import '../modules/explore/bindings/explore_binding.dart';
 import '../modules/explore/views/explore_view.dart';
-import '../modules/location_input/bindings/location_input_bindings.dart';
-import '../modules/location_input/views/location_input_view.dart';
+// import '../modules/location_input/bindings/location_input_bindings.dart';
+// import '../modules/location_input/views/location_input_view.dart';
 import '../modules/Service/bindings/service_provider_binding.dart';
 import '../modules/Service/Views/service_provider_view.dart';
 import '../modules/review/bindings/review_binding.dart';
@@ -69,14 +80,20 @@ import '../modules/contact_us/bindings/contact_us_bindings.dart';
 import '../modules/contact_us/views/contact_us_views.dart';
 import '../modules/navbar/bindings/navbar_binding.dart';
 import '../modules/navbarMerdeka/bindings/navbar_binding.dart';
+import '../modules/getconnect/bindings/getconnect_binding.dart';
+import '../modules/getconnect/views/getconnect_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
+import '../modules/settings/views/settings_view.dart';
+
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.ONBOARDING;
+  static const INITIAL = Routes.LOGIN;
   static const LOGIN = Routes.LOGIN;
+  static const REGISTER = Routes.REGISTER;
   static const PROMO = Routes.PROMO;
   static const PROFILE = Routes.PROFILE;
   static const ProfileView = Routes.profileView;
@@ -92,6 +109,7 @@ class AppPages {
   static const BOOKUPCOMING = Routes.BOOKUPCOMING;
   static const BOOKCOMPLETED = Routes.BOOKCOMPLETED;
   static const BOOKCANCELLED = Routes.BOOKCANCELLED;
+  static const BOOKSUCCESS = Routes.BOOKSUCCESS;
   static const PAYMENTMETHOD = Routes.PAYMENTMETHOD;
   static const addCard = Routes.addCard;
   static const REVIEWSUMMARY = Routes.REVIEWSUMMARY;
@@ -108,13 +126,22 @@ class AppPages {
   static const ABOUT = Routes.ABOUT;
   static const HELP_CENTER_FAQ = Routes.HELP_CENTER_FAQ;
   static const CONTACT_US = Routes.CONTACT_US;
+  static const SETTINGS = Routes.SETTINGS;
+  static const SELECTED_LOCATION = Routes.SELECTED_LOCATION;
 
   static final routes = [
-    GetPage(
-      name: _Paths.LOGIN,
-      page: () => const LoginView(),
-      binding: LoginBinding(),
-    ),
+    GetPage(name: _Paths.LOGIN, page: () => const LoginView(), bindings: [
+      RegisterBinding(),
+      LoginBinding(),
+      NavbarBinding(),
+      ProfileBinding()
+    ]),
+    GetPage(name: _Paths.REGISTER, page: () => const RegisterView(), bindings: [
+      RegisterBinding(),
+      LoginBinding(),
+      NavbarBinding(),
+      ProfileBinding()
+    ]),
     GetPage(name: _Paths.HOME, page: () => const HomeView(), bindings: [
       HomeBinding(),
       NavbarBinding(),
@@ -130,170 +157,196 @@ class AppPages {
         ]),
     GetPage(
       name: _Paths.PROMO,
-      page: () => const PromoView(), // Ensure this points to CategoryView
+      page: () => const PromoView(),
       binding: PromoBinding(),
     ),
     GetPage(name: _Paths.PROFILE, page: () => const ProfileViews(), bindings: [
       ProfileBinding(),
       NavbarBinding(),
+      AuthenticationBinding(),
     ]),
+    GetPage(
+      name: _Paths.SERVICEBOOKING,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>;
+        return ServiceBookingView(
+          serviceType: args['serviceType'] as String,
+          providerName: args['providerName'] as String,
+          price: args['price'] as double,
+          longitude: args['longitude'] as double,
+          latitude: args['latitude'] as double,
+          address: args['address'] as String,
+        );
+      },
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ServiceBookingController());
+      }),
+    ),
     GetPage(
         name: _Paths.ProfileView,
         page: () => const ProfileViewView(),
         bindings: [
           ProfileViewBinding(),
+          NavbarBinding(),
         ]),
     GetPage(
       name: _Paths.CATEGORY,
-      page: () => const CategoryView(), // Ensure this points to CategoryView
+      page: () => const CategoryView(),
       binding: CategoryBinding(),
     ),
     GetPage(
       name: _Paths.ONBOARDING,
-      page: () => const OnboardingView(), // Ensure this points to CategoryView
+      page: () => const OnboardingView(),
       binding: OnboardingBinding(),
     ),
     GetPage(
       name: _Paths.STARTED,
-      page: () => StartedView(), // Ensure this points to CategoryView
+      page: () => const StartedView(),
       binding: StartedBinding(),
     ),
-    GetPage(
-      name: _Paths.EXPLORE,
-      page: () => const ExploreView(), // Ensure this points to CategoryView
-      binding: ExploreBinding(),
-    ),
-    GetPage(
-      name: _Paths.BOOKMARK,
-      page: () => const BookmarkView(), // Ensure this points to CategoryView
-      binding: BookmarkBinding(),
-    ),
+    GetPage(name: _Paths.EXPLORE, page: () => const ExploreView(), bindings: [
+      ExploreBinding(),
+      NavbarBinding(),
+    ]),
+    GetPage(name: _Paths.BOOKMARK, page: () => const BookmarkView(), bindings: [
+      BookmarkBinding(),
+      NavbarBinding(),
+    ]),
     GetPage(
       name: _Paths.POPULAR,
-      page: () =>
-          const PopularServiceView(), // Ensure this points to CategoryView
+      page: () => const PopularServiceView(),
       binding: PopularServiceBinding(),
     ),
-    GetPage(
-      name: _Paths.MESSAGE,
-      page: () => const MessageView(), // Ensure this points to CategoryView
-      binding: MessageBinding(),
-    ),
+    GetPage(name: _Paths.MESSAGE, page: () => const MessageView(), bindings: [
+      MessageBinding(),
+      NavbarBinding(),
+    ]),
     GetPage(
       name: _Paths.NOTIFICATION,
-      page: () =>
-          const NotificationView(), // Ensure this points to CategoryView
+      page: () => const NotificationView(),
       binding: NotificationBinding(),
     ),
     GetPage(
       name: _Paths.BookService,
-      page: () => const BookServiceView(), // Ensure this points to CategoryView
+      page: () => const BookServiceView(),
       binding: BookServiceBinding(),
     ),
     GetPage(
       name: _Paths.BOOKUPCOMING,
-      page: () => const MyBookingsView(), // Ensure this points to CategoryView
+      page: () => const MyBookingsView(),
       binding: BookupcomingBinding(),
     ),
     GetPage(
       name: _Paths.BOOKCOMPLETED,
-      page: () =>
-          const BookcompletedViews(), // Ensure this points to CategoryView
+      page: () => const BookcompletedViews(),
       binding: BookcompletedBinding(),
     ),
     GetPage(
       name: _Paths.BOOKCANCELLED,
-      page: () =>
-          const BookcancelledViews(), // Ensure this points to CategoryView
+      page: () => const BookcancelledViews(),
       binding: BookcancelledBinding(),
     ),
     GetPage(
+      name: _Paths.BOOKSUCCESS,
+      page: () => const BooksuccessViews(),
+      binding: BooksuccessBinding(),
+    ),
+    GetPage(
       name: _Paths.PAYMENTMETHOD,
-      page: () =>
-          const PaymentmethodView(), // Ensure this points to CategoryView
+      page: () => const PaymentmethodView(),
       binding: PaymentmethodBinding(),
     ),
     GetPage(
       name: _Paths.addCard,
-      page: () => const AddCardView(), // Ensure this points to CategoryView
+      page: () => const AddCardView(),
       binding: AddCardBinding(),
     ),
     GetPage(
       name: _Paths.REVIEWSUMMARY,
-      page: () =>
-          const ReviewsummaryView(), // Ensure this points to CategoryView
+      page: () => const ReviewsummaryView(),
       binding: ReviewSummaryBinding(),
     ),
     GetPage(
       name: _Paths.SUCCESSBOOKING,
-      page: () =>
-          const SuccessbookingView(), // Ensure this points to CategoryView
+      page: () => const SuccessbookingView(),
       binding: SuccessbookingBinding(),
     ),
     GetPage(
       name: _Paths.ERECEIPT,
-      page: () => const EreceiptView(), // Ensure this points to CategoryView
+      page: () => const EreceiptView(),
       binding: EreceiptBinding(),
     ),
     GetPage(
       name: _Paths.PRIVACYPOLICY,
-      page: () =>
-          const PrivacypolicyView(), // Ensure this points to CategoryView
+      page: () => const PrivacypolicyView(),
       binding: PrivacypolicyBinding(),
     ),
     GetPage(
       name: _Paths.CONFIRM_ADDRESS,
-      page: () =>
-          const ConfirmAddressView(), // Ensure this points to CategoryView
+      page: () => const ConfirmAddressView(),
       binding: ConfirmAddressBinding(),
     ),
     GetPage(
       name: _Paths.servicePage,
-      page: () => const ServicePageView(), // Ensure this points to CategoryView
+      page: () => const ServicePageView(),
       binding: ServicePageBinding(),
     ),
     GetPage(
       name: _Paths.servicePageConfirmation,
-      page: () =>
-          const ServicePageConfirmationView(), // Ensure this points to CategoryView
+      page: () => const ServicePageConfirmationView(),
       binding: ServicePageConfirmationBinding(),
     ),
     GetPage(
       name: _Paths.LOCATIONINPUT,
-      page: () =>
-          const LocationInputView(), // Ensure this points to CategoryView
-      binding: LocationInputBinding(),
+      page: () => const GetConnectView(),
+      binding: GetConnectBinding(),
     ),
     GetPage(
       name: _Paths.SERVICE,
-      page: () =>
-          const ServiceProviderView(), // Ensure this points to CategoryView
+      page: () => const ServiceProviderView(),
       binding: ServiceProviderBinding(),
     ),
     GetPage(
       name: _Paths.REVIEW,
-      page: () => const reviewView(), // Ensure this points to CategoryView
+      page: () => const reviewView(),
       binding: reviewBinding(),
     ),
     GetPage(
       name: _Paths.GALLARY,
-      page: () => const GalleryView(), // Ensure this points to CategoryView
+      page: () => const GalleryView(),
       binding: GalleryBinding(),
     ),
     GetPage(
       name: _Paths.ABOUT,
-      page: () => const AboutView(), // Ensure this points to CategoryView
+      page: () => const AboutView(),
       binding: AboutBinding(),
     ),
     GetPage(
       name: _Paths.HELP_CENTER_FAQ,
-      page: () => const FaqView(), // Ensure this points to CategoryView
+      page: () => const FaqView(),
       binding: FaqBinding(),
     ),
     GetPage(
       name: _Paths.CONTACT_US,
-      page: () => const ContactUsView(), // Ensure this points to CategoryView
+      page: () => const ContactUsView(),
       binding: ContactUsBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+    ),
+
+    GetPage(
+      name: _Paths.MAPS,
+      page: () => const MapsView(),
+      binding: MapsBinding(),
+    ),
+
+    GetPage(
+      name:  _Paths.SELECTED_LOCATION,
+      page: () => SelectedLocationView(),
+      binding: SelectedLocationBinding(),
     ),
   ];
 }

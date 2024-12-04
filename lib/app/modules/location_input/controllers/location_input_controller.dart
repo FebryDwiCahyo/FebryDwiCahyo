@@ -10,6 +10,8 @@ class LocationInputController extends GetxController {
     if (value.isNotEmpty) {
       searchResults.assignAll([
         Location('Galaxy Mall Surabaya', 'Jl. Dharmahusada Indah Timur, Surabaya, Indonesia'),
+        Location('Tunjungan Plaza', 'Jl. Basuki Rahmat, Surabaya, Indonesia'),
+        Location('Pakuwon Mall', 'Jl. Puncak Indah Lontar, Surabaya, Indonesia'),
       ]);
     } else {
       searchResults.clear();
@@ -23,6 +25,8 @@ class LocationInputController extends GetxController {
 
   void useCurrentLocation() {
     // Implement current location logic here
+    searchController.text = 'Current Location';
+    searchResults.clear();
     Get.snackbar('Current Location', 'Using current location...');
   }
 
