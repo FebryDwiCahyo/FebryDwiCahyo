@@ -148,7 +148,6 @@ class FaqView extends GetView<FaqController> {
                         mode: LaunchMode.externalApplication,
                       );
                     } else {
-                      // Fallback for devices without Google Maps
                       ScaffoldMessenger.of(Get.context!).showSnackBar(
                         const SnackBar(content: Text('Could not open Google Maps')),
                       );
@@ -160,7 +159,7 @@ class FaqView extends GetView<FaqController> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Different color to distinguish from iFixit button
+                  backgroundColor: Colors.green, 
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
