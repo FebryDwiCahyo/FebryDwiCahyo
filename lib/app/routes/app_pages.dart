@@ -349,15 +349,16 @@ class AppPages {
       binding: SelectedLocationBinding(),
     ),
 
-  GetPage(
-  name: '/search-results',
-  page: () {
-    final arguments = Get.arguments;
-    return SearchResultsView(
-      query: arguments['query'],
-      services: arguments['services'],
-    );
-  },
-),
+    GetPage(
+    name: '/search-results',
+    page: () {
+      final arguments = Get.arguments;
+      return SearchResultsView(
+        query: arguments['query'],
+        services: arguments['services'],
+      );
+    },
+  ),
+  
   ];
 }
