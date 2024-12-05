@@ -139,7 +139,7 @@ class FaqView extends GetView<FaqController> {
               ElevatedButton(
                 onPressed: () async {
                   final String googleMapsUrl = 
-                      'https://maps.app.goo.gl/36Zt2vBfdpZrY3R6A'; // Example: San Francisco coordinates
+                      'https://maps.app.goo.gl/36Zt2vBfdpZrY3R6A'; 
                   
                   try {
                     if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
